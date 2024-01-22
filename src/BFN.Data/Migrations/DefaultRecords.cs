@@ -1,32 +1,14 @@
 ﻿using BFN.Data.Models;
-using SQLite;
 
-namespace BFN.App.Services
+namespace BFN.Data.Migrations;
+
+public static class DefaultRecords
 {
-    public static class ExerciseService
+    public static List<Category> Categories
     {
-        private static SQLiteAsyncConnection db;
-        private static bool isInitialized = false;
-
-        static ExerciseService()
+        get
         {
-            InitializeDatabase();
-        }
-
-        private static void InitializeDatabase()
-        {
-            if (!isInitialized)
-            {
-                var databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BFNData.db");
-                db = new SQLiteAsyncConnection(databasePath);
-                db.CreateTableAsync<Exercise>();
-                isInitialized = true;
-            }
-        }
-
-        public static async Task AddDefaultRecords()
-        {
-            var defaultCategories = new List<Category>
+            var categories = new List<Category>
             {
                 new() { Id = 1, Name = "Abs" },
                 new() { Id = 2, Name = "Back" },
@@ -37,21 +19,14 @@ namespace BFN.App.Services
                 new() { Id = 7, Name = "Shoulders" },
                 new() { Id = 8, Name = "Triceps" }
             };
-
-            var existingCategories = await db.Table<Category>().ToListAsync();
-            var existingCategoryNames = new HashSet<string>(existingCategories.Select(c => c.Name));
-
-            var categoriesToAdd = defaultCategories.Where(c => !existingCategoryNames.Contains(c.Name)).ToList();
-
-            await db.RunInTransactionAsync(trans =>
-            {
-                foreach (var category in categoriesToAdd)
-                {
-                    trans.Insert(category);
-                }
-            });
-
-            var defaultExercises = new List<Exercise>
+            return categories;
+        }
+    }
+    public static List<Exercise> Exercises
+    {
+        get
+        {
+            var exercises = new List<Exercise>
             {
                 new() { CategoryId = 1, Name = "Ab Coaster"},
                 new() { CategoryId = 1, Name = "Ab-Wheel Rollout"},
@@ -212,10 +187,7 @@ namespace BFN.App.Services
                 new() { CategoryId = 3, Name = "Wide Cable Curl"},
                 new() { CategoryId = 4, Name = "Yoga"}
             };
-            foreach (var Exercise in defaultExercises)
-            {
-                await db.InsertAsync(Exercise);
-            }
+            return exercises;
         }
     }
 }

@@ -13,8 +13,9 @@ else
             @foreach (var category in categories)
             {
                 <tr>
-                    <td>@category.Id</td>
-                    <td>@category.Name</td>
+                    <td>
+                        <NavLink href="@("/exercises/" + category.Id)">@category.Name</NavLink>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -26,6 +27,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        categories = await CategoryService.db.Table<Category>().ToListAsync();
+        categories = await DataService.db.Table<Category>().ToListAsync();
     }
 }

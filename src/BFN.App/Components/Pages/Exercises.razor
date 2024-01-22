@@ -1,0 +1,33 @@
+﻿@page "/exercises/{CategoryId:int}"
+@using BFN.App.Services
+@using BFN.Data.Models
+
+@if (exercises == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <tbody>
+            @foreach (var exercise in exercises)
+            {
+                <tr>
+                    <td>@exercise.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public int CategoryId { get; set; }
+
+    private IEnumerable<Exercise> exercises;
+
+    protected override async Task OnInitializedAsync()
+    {
+        exercises = await DataService.GetExercisesByCategory(CategoryId);
+    }
+}
