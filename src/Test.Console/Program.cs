@@ -43,7 +43,7 @@ foreach (var exercise in sortedExercises)
 
         exercises.Add(ex);
 
-        Console.WriteLine("new() { Name = \"" + exercise.Name + "\" , ExerciseId = " + newCategoryId + "},");
+        Console.WriteLine("new() { CategoryId = " + newCategoryId + ", Name = \"" + exercise.Name + "\"},");
     }
 }
 

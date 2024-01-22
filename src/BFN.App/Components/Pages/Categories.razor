@@ -13,6 +13,7 @@ else
             @foreach (var category in categories)
             {
                 <tr>
+                    <td>@category.Id</td>
                     <td>@category.Name</td>
                 </tr>
             }
@@ -25,8 +26,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await CategoryService.RemoveAllCategories();
-        await CategoryService.AddDefaultCategories();
-        categories = await CategoryService.GetAllCategories();
+        categories = await CategoryService.db.Table<Category>().ToListAsync();
     }
 }

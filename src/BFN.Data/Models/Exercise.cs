@@ -5,5 +5,5 @@ public class Exercise : BaseModel
     public string Name { get; set; }
     public string Notes { get; set; }
     public Category ExerciseCategory { get; set; }
-    public int ExerciseId { get; set; }
+    public int CategoryId { get; set; }
 }
