@@ -13,7 +13,9 @@ else
             @foreach (var exercise in exercises)
             {
                 <tr>
-                    <td>@exercise.Name</td>
+                    <td>
+                        <NavLink href="@("/newlogentry/" + exercise.Id)">@exercise.Name</NavLink>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -28,6 +30,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        exercises = await DataService.GetExercisesByCategory(CategoryId);
+        exercises = await DataService.db.Table<Exercise>().Where(e => e.CategoryId == CategoryId).ToListAsync();
     }
 }

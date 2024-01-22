@@ -1,0 +1,47 @@
+﻿@page "/newlogentry/{ExerciseId:int}"
+@using BFN.App.Services
+@using BFN.Data.Models
+
+@if (exercise == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h1>@exercise.Name</h1>
+    <EditForm Model="@newLogEntry" OnValidSubmit="HandleValidSubmit">
+        <div>
+            <label for="metricWeight">Weight:</label>
+            <InputNumber @bind-Value="newLogEntry.MetricWeight" id="metricWeight" class="form-control" />
+        </div>
+        <div>
+            <label for="reps">Reps:</label>
+            <InputNumber @bind-Value="newLogEntry.Reps" id="reps" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Log Entry</button>
+    </EditForm>
+}
+
+
+@code {
+    [Parameter]
+    public int ExerciseId { get; set; }
+
+    private Exercise exercise;
+    private TrainingLog newLogEntry = new TrainingLog();
+
+    protected override async Task OnInitializedAsync()
+    {
+        exercise = await DataService.db.GetAsync<Exercise>(ExerciseId);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        newLogEntry.ExerciseId = ExerciseId;
+        newLogEntry.Date = DateTime.Now;
+
+        await DataService.db.InsertAsync(newLogEntry);
+
+        newLogEntry = new TrainingLog();
+    }
+}

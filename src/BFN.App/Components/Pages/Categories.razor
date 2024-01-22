@@ -8,6 +8,7 @@
 }
 else
 {
+
     <table class="table">
         <tbody>
             @foreach (var category in categories)
@@ -27,6 +28,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        categories = await DataService.db.Table<Category>().ToListAsync();
+        categories = await DataService.db.Table<Category>().ToListAsync();        
     }
 }

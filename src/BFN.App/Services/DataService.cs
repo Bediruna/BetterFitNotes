@@ -89,9 +89,5 @@ namespace BFN.App.Services
                 Console.WriteLine(ex.ToString());
             }
         }
-        public static async Task<List<Exercise>> GetExercisesByCategory(int categoryId)
-        {
-            return await db.Table<Exercise>().Where(e => e.CategoryId == categoryId).ToListAsync();
-        }
     }
 }
