@@ -1,3 +1,5 @@
+namespace BFN.Data.Models;
+
 class TrainingLog : BaseModel
 {
     public DateTime Date { get; set; }
@@ -5,5 +7,5 @@ class TrainingLog : BaseModel
     public int Reps { get; set; }
     public int Distance { get; set; }
     public int DurationSeconds { get; set; }
-    public required Exercise LogExercise { get; set; }
+    public Exercise LogExercise { get; set; }
 }

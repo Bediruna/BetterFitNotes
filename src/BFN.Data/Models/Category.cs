@@ -1,4 +1,6 @@
-class Category : BaseModel
+namespace BFN.Data.Models;
+
+public class Category : BaseModel
 {
-    public required string Name { get; set; }
+    public string Name { get; set; }
 }

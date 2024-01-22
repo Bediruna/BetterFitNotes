@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentMigrator" Version="5.0.0" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.9.141-beta" />
   </ItemGroup>
 
 </Project>
