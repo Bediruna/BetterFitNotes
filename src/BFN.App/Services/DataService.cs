@@ -1,6 +1,9 @@
 ﻿using BFN.Data.Migrations;
 using BFN.Data.Models;
+using BFN.Data.Scripts;
 using SQLite;
+using Dapper;
+using System.Data.SQLite;
 
 namespace BFN.App.Services
 {
@@ -8,6 +11,7 @@ namespace BFN.App.Services
     {
         public static SQLiteAsyncConnection db;
         private static bool isInitialized = false;
+        private static string databasePath;
 
         static DataService()
         {
@@ -30,18 +34,11 @@ namespace BFN.App.Services
             {
                 try
                 {
-                    var databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BFNData.db");
+                    databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BFNData.db");
                     db = new SQLiteAsyncConnection(databasePath);
-                    await db.CreateTableAsync<Category>();
-                    await db.CreateTableAsync<Exercise>();
-                    await db.CreateTableAsync<TrainingLog>();
 
-                    var categoriesCount = await db.Table<Category>().CountAsync();
-                    var exercisesCount = await db.Table<Exercise>().CountAsync();
-                    if (categoriesCount == 0 || exercisesCount == 0)
-                    {
-                        await AddDefaultRecords();
-                    }
+                    await AddInitialTables();
+                    await AddDefaultRecordsIfNeeded();
 
                     isInitialized = true;
                 }
@@ -54,33 +51,88 @@ namespace BFN.App.Services
             }
         }
 
-        public static async Task AddDefaultRecords()
+        private static async Task AddInitialTables()
+        {
+            var connectionString = $"Data Source={databasePath}";
+            using var connection = new System.Data.SQLite.SQLiteConnection(connectionString);
+            await connection.OpenAsync();
+
+            await connection.ExecuteAsync(CreateInitialTableSqlScripts.CreateCategoryTableSql);
+            await connection.ExecuteAsync(CreateInitialTableSqlScripts.CreateExerciseTableSql);
+            await connection.ExecuteAsync(CreateInitialTableSqlScripts.CreateTrainingLogTableSql);
+        }
+
+        public static async Task<List<TrainingLog>> FetchTodaysLogs(int ExerciseId)
         {
             try
             {
-                var existingCategories = await db.Table<Category>().ToListAsync();
-                var existingCategoryNames = new HashSet<string>(existingCategories.Select(c => c.Name));
-                var categoriesToAdd = DefaultRecords.Categories.Where(c => !existingCategoryNames.Contains(c.Name)).ToList();
+                var today = DateTime.Now.Date;
+                var tomorrow = today.AddDays(1);
 
-                await db.RunInTransactionAsync(trans =>
+                var connectionString = $"Data Source={databasePath}";
+
+                using var connection = new System.Data.SQLite.SQLiteConnection(connectionString);
+                await connection.OpenAsync();
+
+                //var result = await connection.QueryAsync<TrainingLog>(SqlScripts.FetchTodaysLogs, new
+                //{
+                //    StartDate = today,
+                //    EndDate = tomorrow,
+                //    ExerciseId = ExerciseId
+                //});
+                
+                var result = await connection.QueryAsync<TrainingLog>(SqlScripts.FetchTodaysLogsTest);
+
+                return result.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new List<TrainingLog>(); // Or handle the exception as needed
+            }
+        }
+
+
+        public class TrainingLogQueryParameters
+        {
+            public DateTime StartDate { get; set; }
+            public DateTime EndDate { get; set; }
+            public int ExerciseId { get; set; }
+        }
+
+        public static async Task AddDefaultRecordsIfNeeded()
+        {
+            try
+            {
+                var categories = await db.Table<Category>().ToListAsync();
+                if (categories.Count == 0)
                 {
-                    foreach (var category in categoriesToAdd)
+                    var existingCategoryNames = new HashSet<string>(categories.Select(c => c.Name));
+                    var categoriesToAdd = DefaultRecords.Categories.Where(c => !existingCategoryNames.Contains(c.Name)).ToList();
+
+                    await db.RunInTransactionAsync(trans =>
                     {
-                        trans.Insert(category);
-                    }
-                });
+                        foreach (var category in categoriesToAdd)
+                        {
+                            trans.Insert(category);
+                        }
+                    });
+                }
 
-                var existingExercises = await db.Table<Exercise>().ToListAsync();
-                var existingExerciseNames = new HashSet<string>(existingExercises.Select(c => c.Name));
-                var exercisesToAdd = DefaultRecords.Exercises.Where(c => !existingExerciseNames.Contains(c.Name)).ToList();
-
-                await db.RunInTransactionAsync(trans =>
+                var exercises = await db.Table<Exercise>().ToListAsync();
+                if (exercises.Count == 0)
                 {
-                    foreach (var exercise in exercisesToAdd)
+                    var existingExerciseNames = new HashSet<string>(exercises.Select(c => c.Name));
+                    var exercisesToAdd = DefaultRecords.Exercises.Where(c => !existingExerciseNames.Contains(c.Name)).ToList();
+
+                    await db.RunInTransactionAsync(trans =>
                     {
-                        trans.Insert(exercise);
-                    }
-                });
+                        foreach (var exercise in exercisesToAdd)
+                        {
+                            trans.Insert(exercise);
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {

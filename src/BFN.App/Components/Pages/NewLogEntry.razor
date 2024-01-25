@@ -18,8 +18,39 @@ else
             <label for="reps">Reps:</label>
             <InputNumber @bind-Value="newLogEntry.Reps" id="reps" class="form-control" />
         </div>
-        <button type="submit" class="btn btn-primary">Log Entry</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" @onclick="ClearForm" class="btn btn-secondary">Clear</button>
     </EditForm>
+
+    <h2>Today's Logs</h2>
+    @if (todaysLogs.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Weight</th>
+                    <th>Reps</th>
+                    <!-- Other columns as needed -->
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in todaysLogs)
+                {
+                    <tr>
+                        <td>@log.Date.ToShortDateString()</td>
+                        <td>@log.MetricWeight</td>
+                        <td>@log.Reps</td>
+                        <!-- Other fields as needed -->
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No logs for today.</p>
+    }
 }
 
 
@@ -29,10 +60,12 @@ else
 
     private Exercise exercise;
     private TrainingLog newLogEntry = new TrainingLog();
+    private List<TrainingLog> todaysLogs = new List<TrainingLog>();
 
     protected override async Task OnInitializedAsync()
     {
         exercise = await DataService.db.GetAsync<Exercise>(ExerciseId);
+        await DataService.FetchTodaysLogs(ExerciseId);
     }
 
     private async Task HandleValidSubmit()
@@ -43,5 +76,12 @@ else
         await DataService.db.InsertAsync(newLogEntry);
 
         newLogEntry = new TrainingLog();
+        await DataService.FetchTodaysLogs(ExerciseId);
+    }
+
+    private void ClearForm()
+    {
+        newLogEntry = new TrainingLog();
+        StateHasChanged();
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace BFN.Data.Accessors;
 
-interface IDataAccessor
+class DataAccessor : IDataAccessor
 {
 
 }

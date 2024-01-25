@@ -1,4 +1,4 @@
-﻿using FitLogger.Data.Migrations;
+﻿using BFN.Data.Migrations;
 using FluentMigrator.Runner;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
