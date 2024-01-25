@@ -1,6 +1,7 @@
 ﻿@page "/exercises/{CategoryId:int}"
 @using BFN.App.Services
 @using BFN.Data.Models
+@inject DataService dataService
 
 @if (exercises == null)
 {
@@ -30,6 +31,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        exercises = await DataService.db.Table<Exercise>().Where(e => e.CategoryId == CategoryId).ToListAsync();
+        exercises = await dataService.db.Table<Exercise>().Where(e => e.CategoryId == CategoryId).ToListAsync();
     }
 }

@@ -1,6 +1,7 @@
 ﻿@page "/categories"
 @using BFN.App.Services
 @using BFN.Data.Models
+@inject DataService dataService
 
 @if (categories == null)
 {
@@ -27,6 +28,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        categories = await DataService.db.Table<Category>().ToListAsync();        
+        categories = await dataService.db.Table<Category>().ToListAsync();
     }
 }

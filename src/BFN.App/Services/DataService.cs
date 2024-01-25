@@ -1,19 +1,16 @@
 ﻿using BFN.Data.Migrations;
 using BFN.Data.Models;
-using BFN.Data.Scripts;
 using SQLite;
-using Dapper;
-using System.Data.SQLite;
 
 namespace BFN.App.Services
 {
-    public static class DataService
+    public class DataService
     {
-        public static SQLiteAsyncConnection db;
+        public SQLiteAsyncConnection db;
         private static bool isInitialized = false;
         private static string databasePath;
 
-        static DataService()
+        public DataService()
         {
             try
             {
@@ -28,7 +25,7 @@ namespace BFN.App.Services
             }
         }
 
-        private static async Task InitializeDatabase()
+        private async Task InitializeDatabase()
         {
             if (!isInitialized)
             {
@@ -37,7 +34,10 @@ namespace BFN.App.Services
                     databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BFNData.db");
                     db = new SQLiteAsyncConnection(databasePath);
 
-                    await AddInitialTables();
+                    await db.CreateTableAsync<Category>();
+                    await db.CreateTableAsync<Exercise>();
+                    await db.CreateTableAsync<TrainingLog>();
+
                     await AddDefaultRecordsIfNeeded();
 
                     isInitialized = true;
@@ -51,56 +51,30 @@ namespace BFN.App.Services
             }
         }
 
-        private static async Task AddInitialTables()
-        {
-            var connectionString = $"Data Source={databasePath}";
-            using var connection = new System.Data.SQLite.SQLiteConnection(connectionString);
-            await connection.OpenAsync();
-
-            await connection.ExecuteAsync(CreateInitialTableSqlScripts.CreateCategoryTableSql);
-            await connection.ExecuteAsync(CreateInitialTableSqlScripts.CreateExerciseTableSql);
-            await connection.ExecuteAsync(CreateInitialTableSqlScripts.CreateTrainingLogTableSql);
-        }
-
-        public static async Task<List<TrainingLog>> FetchTodaysLogs(int ExerciseId)
+        public async Task<List<TrainingLog>> GetLogs(int exerciseId, DateTime specifiedDate)
         {
             try
             {
-                var today = DateTime.Now.Date;
-                var tomorrow = today.AddDays(1);
+                var targetDate = specifiedDate.Date;
+                var nextDay = targetDate.AddDays(1);
 
-                var connectionString = $"Data Source={databasePath}";
+                var results = await db.Table<TrainingLog>()
+                                      .Where(log => log.ExerciseId == exerciseId &&
+                                                    log.Date >= targetDate &&
+                                                    log.Date < nextDay)
+                                      .OrderByDescending(log => log.Date)
+                                      .ToListAsync();
 
-                using var connection = new System.Data.SQLite.SQLiteConnection(connectionString);
-                await connection.OpenAsync();
-
-                //var result = await connection.QueryAsync<TrainingLog>(SqlScripts.FetchTodaysLogs, new
-                //{
-                //    StartDate = today,
-                //    EndDate = tomorrow,
-                //    ExerciseId = ExerciseId
-                //});
-                
-                var result = await connection.QueryAsync<TrainingLog>(SqlScripts.FetchTodaysLogsTest);
-
-                return result.ToList();
+                return results;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return new List<TrainingLog>(); // Or handle the exception as needed
+                return [];
             }
         }
 
-
-        public class TrainingLogQueryParameters
-        {
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
-            public int ExerciseId { get; set; }
-        }
-
-        public static async Task AddDefaultRecordsIfNeeded()
+        public async Task AddDefaultRecordsIfNeeded()
         {
             try
             {

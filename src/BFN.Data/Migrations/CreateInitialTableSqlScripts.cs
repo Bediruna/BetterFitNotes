@@ -21,7 +21,7 @@ public static class CreateInitialTableSqlScripts
         @"CREATE TABLE IF NOT EXISTS TrainingLog (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
             ExerciseId INTEGER NOT NULL,
-            Date DATE NOT NULL,
+            Date DATETIME NOT NULL DEFAULT (DATETIME('NOW')),
             MetricWeight INTEGER NOT NULL,
             Reps INTEGER NOT NULL,
             Distance INTEGER NOT NULL DEFAULT 0,

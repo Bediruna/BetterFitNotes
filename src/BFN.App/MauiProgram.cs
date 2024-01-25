@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BFN.App.Services;
+using Microsoft.Extensions.Logging;
 
 namespace BFN.App
 {
@@ -16,8 +17,10 @@ namespace BFN.App
 
             builder.Services.AddMauiBlazorWebView();
 
+            builder.Services.AddSingleton<DataService>();
+
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 
