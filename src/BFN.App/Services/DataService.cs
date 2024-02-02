@@ -1,5 +1,7 @@
 ﻿using BFN.Data.Migrations;
 using BFN.Data.Models;
+using BFN.Data.Models.DTOs;
+using BFN.Data.Scripts;
 using SQLite;
 
 namespace BFN.App.Services
@@ -9,6 +11,7 @@ namespace BFN.App.Services
         public SQLiteAsyncConnection db;
         private static bool isInitialized = false;
         private static string databasePath;
+        public DateTime SelectedDate { get; set; } = DateTime.Now;
 
         public DataService()
         {
@@ -51,16 +54,33 @@ namespace BFN.App.Services
             }
         }
 
-        public async Task<List<TrainingLog>> GetLogs(int exerciseId, DateTime specifiedDate)
+        public async Task<List<TrainingLogWithExerciseName>> GetExercises()
         {
             try
             {
-                var targetDate = specifiedDate.Date;
-                var nextDay = targetDate.AddDays(1);
+                var nextDay = SelectedDate.AddDays(1);
+
+                var results = await db.QueryAsync<TrainingLogWithExerciseName>(SqlScripts.GetLogsWithExerciseNameForDay, SelectedDate, nextDay);
+
+                return results;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return [];
+            }
+        }
+
+
+        public async Task<List<TrainingLog>> GetLogs(int exerciseId)
+        {
+            try
+            {
+                var nextDay = SelectedDate.AddDays(1);
 
                 var results = await db.Table<TrainingLog>()
                                       .Where(log => log.ExerciseId == exerciseId &&
-                                                    log.Date >= targetDate &&
+                                                    log.Date >= SelectedDate &&
                                                     log.Date < nextDay)
                                       .OrderByDescending(log => log.Date)
                                       .ToListAsync();

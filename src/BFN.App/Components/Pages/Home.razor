@@ -1,9 +1,78 @@
 ﻿@page "/"
+@using BFN.App.Services
+@using BFN.Data.Models
+@using BFN.Data.Models.DTOs
+@inject DataService dataService
+@inject NavigationManager NavigationManager
 
-<h1>Workout Log Empty</h1>
+<h2>Logs for @DisplayDateText</h2>
+<button @onclick="GoToPreviousDay">←</button>
+<button @onclick="GoToNextDay">→</button>
 
+@if (logs.Any())
+{
+    var groupedLogs = logs.GroupBy(log => log.ExerciseId).ToList();
+
+    foreach (var group in groupedLogs)
+    {
+        <div class="card my-3" @onclick="() => NavigateToExercise(group.Key)">
+            <div class="card-body">
+                <h3 class="card-title">@group.First().ExerciseName</h3>
+                <hr />
+                <table class="table table-borderless mb-0">
+                    <tbody>
+                        @for (int i = 0; i < group.Count(); i++)
+                        {
+                            <tr>
+                                <td><span class="fw-bold">@group.ElementAt(i).MetricWeight</span> lbs</td>
+                                <td><span class="fw-bold">@group.ElementAt(i).Reps</span> reps</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <h1>Workout Log Empty</h1>
+}
 <div class="nav-item px-3">
-    <NavLink class="nav-link" href="categories">
-        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Add New Workout
-    </NavLink>
+    <NavLink class="nav-link" href="categories">+ Add New Workout</NavLink>
 </div>
+
+@code {
+    private List<TrainingLogWithExerciseName> logs = new List<TrainingLogWithExerciseName>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        logs = await dataService.GetExercises();
+    }
+
+    private string DisplayDateText => dataService.SelectedDate.Date switch
+    {
+        var date when date == DateTime.Today => "Today",
+        var date when date == DateTime.Today.AddDays(-1) => "Yesterday",
+        var date when date == DateTime.Today.AddDays(1) => "Tomorrow",
+        _ => dataService.SelectedDate.ToString("dddd, MMM dd"),
+    };
+
+
+    private async Task GoToPreviousDay()
+    {
+        dataService.SelectedDate = dataService.SelectedDate.AddDays(-1);
+        logs = await dataService.GetExercises();
+    }
+
+    private async Task GoToNextDay()
+    {
+        dataService.SelectedDate = dataService.SelectedDate.AddDays(1);
+        logs = await dataService.GetExercises();
+    }
+
+    private void NavigateToExercise(int exerciseId)
+    {
+        NavigationManager.NavigateTo($"/traininglog/{exerciseId}");
+    }
+}

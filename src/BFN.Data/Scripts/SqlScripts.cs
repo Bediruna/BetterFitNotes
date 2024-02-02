@@ -2,9 +2,10 @@
 
 public static class SqlScripts
 {
-    public static string FetchTodaysLogs =>
-        @"SELECT * FROM TrainingLog
-        WHERE Date >= @startDate AND Date < @endDate AND ExerciseId = @exerciseId";
-    public static string FetchTodaysLogsTest =>
-        @"SELECT * FROM TrainingLog";
+    public static string GetLogsWithExerciseNameForDay =>
+        @"SELECT t.*, e.Name AS ExerciseName
+            FROM TrainingLog t
+            INNER JOIN Exercise e ON t.ExerciseId = e.Id
+            WHERE t.Date >= ? AND t.Date < ?
+            ORDER BY t.Date DESC";
 }
