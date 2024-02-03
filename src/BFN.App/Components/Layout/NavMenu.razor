@@ -1,22 +1,21 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿<div class="navbar navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">BetterFitNotes</a>
+        <NavLink class="navbar-brand" href="" Match="NavLinkMatch.All">
+            <span class="bi bi-house-door-fill" aria-hidden="true"></span> BetterFitNotes
+        </NavLink>
+        <div>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="categories">
+                        <span class="bi bi-list-nested" aria-hidden="true"></span> +
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="calendar">
+                        <span class="bi bi-calendar3" aria-hidden="true"></span> 📅
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="categories">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Categories
-            </NavLink>
-        </div>
-    </nav>
 </div>

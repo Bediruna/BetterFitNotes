@@ -9,9 +9,9 @@
 
 <div class="navbar navbar-dark bg-dark justify-content-between px-3">
     <button @onclick="GoToPreviousDay" class="btn btn-dark">←</button>
-    <span class="navbar-text text-white">
+    <button @onclick="SetDateToToday" class="btn btn-dark">
         @DisplayDateText
-    </span>
+    </button>
     <button @onclick="GoToNextDay" class="btn btn-dark">→</button>
 </div>
 
@@ -45,7 +45,7 @@
 }
 else
 {
-    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 70vh;">
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 50vh;">
         <h1>Workout Log Empty</h1>
         <NavLink class="btn btn-primary mt-3" href="categories">+ Add New Exercise</NavLink>
     </div>
@@ -67,6 +67,11 @@ else
         _ => dataService.SelectedDate.ToString("ddd, MMM dd"),
     };
 
+    private async Task SetDateToToday()
+    {
+        dataService.SelectedDate = DateTime.Today;
+        logs = await dataService.GetExercises();
+    }
 
     private async Task GoToPreviousDay()
     {

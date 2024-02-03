@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BFN.Components", "BFN.Compo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BFN.App", "BFN.App\BFN.App.csproj", "{1537EF4C-CFE7-47AF-931E-D94739631487}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Console", "Test.Console\Test.Console.csproj", "{236ED57B-247C-4CA1-A800-E23941F39283}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Console", "Test.Console\Test.Console.csproj", "{236ED57B-247C-4CA1-A800-E23941F39283}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

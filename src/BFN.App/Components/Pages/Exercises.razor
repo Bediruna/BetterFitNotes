@@ -9,18 +9,18 @@
 }
 else
 {
-    <table class="table">
-        <tbody>
+    <div class="container mt-4">
+        <div class="row">
             @foreach (var exercise in exercises)
             {
-                <tr>
-                    <td>
-                        <NavLink href="@("/traininglog/" + exercise.Id)">@exercise.Name</NavLink>
-                    </td>
-                </tr>
+                <div class="col-md-4 mb-3">
+                    <NavLink class="btn btn-outline-primary w-100" href="@("/traininglog/" + exercise.Id)">
+                        @exercise.Name
+                    </NavLink>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    </div>
 }
 
 @code {

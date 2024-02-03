@@ -14,20 +14,20 @@ else
         <div>
             <label for="metricWeight">Weight (lbs):</label>
             <div class="input-group mb-3">
-                <button class="btn btn-outline-secondary" type="button" @onclick="DecrementWeight">-</button>
+                <button class="btn btn-secondary px-4" type="button" @onclick="DecrementWeight">-</button>
                 <InputNumber @bind-Value="trainingLog.MetricWeight" id="metricWeight" class="form-control text-center" />
-                <button class="btn btn-outline-secondary" type="button" @onclick="IncrementWeight">+</button>
+                <button class="btn btn-secondary px-4" type="button" @onclick="IncrementWeight">+</button>
             </div>
         </div>
         <div>
             <label for="reps">Reps:</label>
             <div class="input-group mb-3">
-                <button class="btn btn-outline-secondary" type="button" @onclick="DecrementReps" disabled="@((trainingLog.Reps <= 1))">-</button>
+                <button class="btn btn-secondary px-4" type="button" @onclick="DecrementReps" disabled="@((trainingLog.Reps <= 1))">-</button>
                 <InputNumber @bind-Value="trainingLog.Reps" id="reps" class="form-control text-center" />
-                <button class="btn btn-outline-secondary" type="button" @onclick="IncrementReps">+</button>
+                <button class="btn btn-secondary px-4" type="button" @onclick="IncrementReps">+</button>
             </div>
         </div>
-        <div class="row">
+        <div class="row mb-3">
             <div class="col-6">
                 <button type="submit" class="btn @(isEditMode ? "btn-success" : "btn-primary") w-100">@primaryButtonText</button>
             </div>
@@ -38,7 +38,7 @@ else
 
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="alert alert-danger mt-3" role="alert">
+            <div class="alert alert-danger" role="alert">
                 @errorMessage
             </div>
         }
