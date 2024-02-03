@@ -1,13 +1,19 @@
 ﻿@page "/"
+@using BFN.App.Components.Layout
+@layout HomeLayout
 @using BFN.App.Services
 @using BFN.Data.Models
 @using BFN.Data.Models.DTOs
 @inject DataService dataService
 @inject NavigationManager NavigationManager
 
-<h2>Logs for @DisplayDateText</h2>
-<button @onclick="GoToPreviousDay">←</button>
-<button @onclick="GoToNextDay">→</button>
+<div class="navbar navbar-dark bg-dark justify-content-between px-3">
+    <button @onclick="GoToPreviousDay" class="btn btn-dark">←</button>
+    <span class="navbar-text text-white">
+        @DisplayDateText
+    </span>
+    <button @onclick="GoToNextDay" class="btn btn-dark">→</button>
+</div>
 
 @if (logs.Any())
 {
@@ -15,7 +21,7 @@
 
     foreach (var group in groupedLogs)
     {
-        <div class="card my-3" @onclick="() => NavigateToExercise(group.Key)">
+        <div class="card m-3" @onclick="() => NavigateToExercise(group.Key)">
             <div class="card-body">
                 <h3 class="card-title">@group.First().ExerciseName</h3>
                 <hr />
@@ -33,14 +39,17 @@
             </div>
         </div>
     }
+    <div class="d-flex flex-row align-items-center justify-content-center">
+        <NavLink class="btn btn-primary" href="categories">+ Add New Exercise</NavLink>
+    </div>
 }
 else
 {
-    <h1>Workout Log Empty</h1>
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 70vh;">
+        <h1>Workout Log Empty</h1>
+        <NavLink class="btn btn-primary mt-3" href="categories">+ Add New Exercise</NavLink>
+    </div>
 }
-<div class="nav-item px-3">
-    <NavLink class="nav-link" href="categories">+ Add New Workout</NavLink>
-</div>
 
 @code {
     private List<TrainingLogWithExerciseName> logs = new List<TrainingLogWithExerciseName>();
@@ -55,7 +64,7 @@ else
         var date when date == DateTime.Today => "Today",
         var date when date == DateTime.Today.AddDays(-1) => "Yesterday",
         var date when date == DateTime.Today.AddDays(1) => "Tomorrow",
-        _ => dataService.SelectedDate.ToString("dddd, MMM dd"),
+        _ => dataService.SelectedDate.ToString("ddd, MMM dd"),
     };
 
 

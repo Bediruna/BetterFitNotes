@@ -10,15 +10,13 @@ namespace BFN.App.Services
     {
         public SQLiteAsyncConnection db;
         private static bool isInitialized = false;
-        private static string databasePath;
         public DateTime SelectedDate { get; set; } = DateTime.Now;
 
         public DataService()
         {
             try
             {
-                //Task.Run(InitializeDatabase).Wait();
-                InitializeDatabase();
+                Task.Run(InitializeDatabase).Wait();
             }
             catch (Exception ex)
             {
@@ -34,8 +32,7 @@ namespace BFN.App.Services
             {
                 try
                 {
-                    databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BFNData.db");
-                    db = new SQLiteAsyncConnection(databasePath);
+                    db = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
 
                     await db.CreateTableAsync<Category>();
                     await db.CreateTableAsync<Exercise>();
@@ -58,9 +55,10 @@ namespace BFN.App.Services
         {
             try
             {
-                var nextDay = SelectedDate.AddDays(1);
+                var startDate = SelectedDate.Date;
+                var nextDay = startDate.AddDays(1);
 
-                var results = await db.QueryAsync<TrainingLogWithExerciseName>(SqlScripts.GetLogsWithExerciseNameForDay, SelectedDate, nextDay);
+                var results = await db.QueryAsync<TrainingLogWithExerciseName>(SqlScripts.GetLogsWithExerciseNameForDay, startDate, nextDay);
 
                 return results;
             }
@@ -76,11 +74,12 @@ namespace BFN.App.Services
         {
             try
             {
-                var nextDay = SelectedDate.AddDays(1);
+                var startDate = SelectedDate.Date;
+                var nextDay = startDate.AddDays(1);
 
                 var results = await db.Table<TrainingLog>()
                                       .Where(log => log.ExerciseId == exerciseId &&
-                                                    log.Date >= SelectedDate &&
+                                                    log.Date >= startDate &&
                                                     log.Date < nextDay)
                                       .OrderByDescending(log => log.Date)
                                       .ToListAsync();

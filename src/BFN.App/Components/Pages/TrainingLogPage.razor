@@ -27,8 +27,14 @@ else
                 <button class="btn btn-outline-secondary" type="button" @onclick="IncrementReps">+</button>
             </div>
         </div>
-        <button type="submit" class="btn @(isEditMode ? "btn-success" : "btn-primary")">@primaryButtonText</button>
-        <button type="button" @onclick="ClearOrDelete" class="btn @(isEditMode ? "btn-danger" : "btn-secondary")">@secondaryButtonText</button>
+        <div class="row">
+            <div class="col-6">
+                <button type="submit" class="btn @(isEditMode ? "btn-success" : "btn-primary") w-100">@primaryButtonText</button>
+            </div>
+            <div class="col-6">
+                <button type="button" @onclick="ClearOrDelete" class="btn @(isEditMode ? "btn-danger" : "btn-secondary") w-100">@secondaryButtonText</button>
+            </div>
+        </div>
 
         @if (!string.IsNullOrEmpty(errorMessage))
         {
@@ -37,7 +43,6 @@ else
             </div>
         }
     </EditForm>
-
     @if (logs.Any())
     {
         <table class="table">
@@ -45,15 +50,16 @@ else
                 @for (int i = 0; i < logs.Count; i++)
                 {
                     var currentLog = logs[i];
-                    <tr @onclick="() => SelectLog(currentLog)">
+                    <tr @onclick="() => SelectLog(currentLog)" class="@(trainingLog.Id == currentLog.Id ? "table-info" : "")">
                         <td>@(i + 1)</td>
-                        <td>@logs[i].MetricWeight lbs</td>
-                        <td>@logs[i].Reps reps</td>
+                        <td>@currentLog.MetricWeight lbs</td>
+                        <td>@currentLog.Reps reps</td>
                     </tr>
                 }
             </tbody>
         </table>
     }
+
 }
 
 @code {
