@@ -7,12 +7,12 @@
 @inject DataService dataService
 @inject NavigationManager NavigationManager
 
-<div class="navbar navbar-dark bg-dark justify-content-between px-3">
-    <button @onclick="GoToPreviousDay" class="btn btn-dark">←</button>
+<div class="navbar navbar-dark bg-dark justify-content-between px-2">
+    <button @onclick="GoToPreviousDay" class="btn btn-dark fs-1">&lt;</button>
     <button @onclick="SetDateToToday" class="btn btn-dark">
         @DisplayDateText
     </button>
-    <button @onclick="GoToNextDay" class="btn btn-dark">→</button>
+    <button @onclick="GoToNextDay" class="btn btn-dark fs-1">></button>
 </div>
 
 @if (logs.Any())

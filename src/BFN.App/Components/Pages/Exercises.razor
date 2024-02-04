@@ -9,6 +9,14 @@
 }
 else
 {
+    @if (category != null)
+    {
+        <h2 class="text-center">Exercises in @category.Name</h2>
+    }
+    else
+    {
+        <h2 class="text-center">Exercises</h2>
+    }
     <div class="container mt-4">
         <div class="row">
             @foreach (var exercise in exercises)
@@ -26,11 +34,14 @@ else
 @code {
     [Parameter]
     public int CategoryId { get; set; }
+    private Category category;
 
     private IEnumerable<Exercise> exercises;
 
     protected override async Task OnInitializedAsync()
     {
+        category = await dataService.db.Table<Category>().FirstOrDefaultAsync(c => c.Id == CategoryId);
         exercises = await dataService.db.Table<Exercise>().Where(e => e.CategoryId == CategoryId).ToListAsync();
     }
+
 }
