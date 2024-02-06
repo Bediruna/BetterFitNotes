@@ -70,7 +70,7 @@ namespace BFN.App.Services
         }
 
 
-        public async Task<List<TrainingLog>> GetLogs(int exerciseId)
+        public async Task<List<TrainingLog>> GetLogsForExercise(int exerciseId)
         {
             try
             {

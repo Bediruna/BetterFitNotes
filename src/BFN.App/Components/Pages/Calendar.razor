@@ -1,26 +1,174 @@
 ﻿@page "/calendar"
-@using System.Globalization
 @using BFN.App.Services
 @using BFN.Data.Models
 @inject DataService dataService
+@inject IJSRuntime JSRuntime
+
+<style>
+    .calendar-container {
+        overflow-y: auto;
+        height: calc(100vh - 120px); /* Adjust based on your header/footer */
+    }
+
+    .month-view {
+        margin-bottom: 20px;
+    }
+
+    .calendar {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .calendar th, .calendar td {
+            /* border: 1px solid #ddd; */
+            padding: 8px;
+            text-align: center;
+        }
+
+        .calendar th {
+            /* background-color: #f4f4f4; */
+        }
+
+</style>
+<script>
+    function initializeScrollHandling(dotNetReference, elementId) {
+        const element = document.getElementById(elementId);
+        element.onscroll = () => {
+            const scrollTop = element.scrollTop;
+            const scrollHeight = element.scrollHeight;
+            const offsetHeight = element.offsetHeight;
+            const bottomReached = scrollTop + offsetHeight >= scrollHeight;
+            const topReached = scrollTop === 0;
+
+            if (bottomReached) {
+                dotNetReference.invokeMethodAsync('LoadMoreMonths', false);
+            } else if (topReached) {
+                dotNetReference.invokeMethodAsync('LoadMoreMonths', true);
+            }
+        };
+    }
+
+    window.initializeScrollHandling = initializeScrollHandling;
+</script>
 
 <h3>Calendar</h3>
 
-<div style="overflow-x:auto;">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Sun</th>
-                <th>Mon</th>
-                <th>Tue</th>
-                <th>Wed</th>
-                <th>Thu</th>
-                <th>Fri</th>
-                <th>Sat</th>
-            </tr>
-        </thead>
-    </table>
+<div class="calendar-container">
+    @foreach (var monthDate in displayedMonths)
+    {
+        <div class="month-container">
+            <h2>@monthDate.ToString("Y")</h2>
+            <table class="calendar">
+                <thead>
+                    <tr>
+                        <th>Sun</th>
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thu</th>
+                        <th>Fri</th>
+                        <th>Sat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @RenderMonth(monthDate.Month)
+                </tbody>
+            </table>
+        </div>
+    }
+
 </div>
 
 @code {
+    private RenderFragment RenderMonth(int month) => builder =>
+    {
+        var firstDayOfMonth = new DateTime(DateTime.Now.Year, month, 1);
+        int daysInMonth = DateTime.DaysInMonth(DateTime.Now.Year, month);
+        int offset = (int)firstDayOfMonth.DayOfWeek;
+        int row = 0;
+
+        // Start the first row
+        builder.OpenElement(row++, "tr");
+        for (int i = 0; i < offset; i++)
+        {
+            builder.OpenElement(row++, "td");
+            builder.CloseElement();
+        }
+
+        for (int day = 1; day <= daysInMonth; day++)
+        {
+            if ((day + offset) % 7 == 1 && day > 1)
+            {
+                builder.CloseElement(); // Close the previous row
+                builder.OpenElement(row++, "tr"); // Start a new row
+            }
+
+            builder.OpenElement(row++, "td");
+            builder.AddContent(row++, day.ToString());
+            builder.CloseElement();
+        }
+
+        // Fill the rest of the last row with empty cells if needed
+        int remainingCells = (7 - ((daysInMonth + offset) % 7)) % 7;
+        for (int i = 0; i < remainingCells; i++)
+        {
+            builder.OpenElement(row++, "td");
+            builder.CloseElement();
+        }
+
+        builder.CloseElement(); // Close the last row
+    };
+
+    private List<DateTime> displayedMonths = new();
+    private DateTime initialMonth = DateTime.Today;
+    private int monthsToDisplay = 12; // Initial number of months to display
+
+    protected override void OnInitialized()
+    {
+        LoadMonths(initialMonth, monthsToDisplay);
+    }
+
+    private void LoadMonths(DateTime startMonth, int count, bool prepend = false)
+    {
+        if (prepend)
+        {
+            for (int i = count; i >= 1; i--)
+            {
+                displayedMonths.Insert(0, startMonth.AddMonths(-i));
+            }
+        }
+        else
+        {
+            for (int i = 0; i < count; i++)
+            {
+                displayedMonths.Add(startMonth.AddMonths(i));
+            }
+        }
+    }
+    private ElementReference calendarContainer;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initializeScrollHandling", DotNetObjectReference.Create(this), "calendarContainer");
+        }
+    }
+
+    [JSInvokable]
+    public async Task LoadMoreMonths(bool prepend)
+    {
+        if (prepend)
+        {
+            var firstMonth = displayedMonths.First();
+            LoadMonths(firstMonth.AddMonths(-1), 1, true);
+        }
+        else
+        {
+            var lastMonth = displayedMonths.Last();
+            LoadMonths(lastMonth.AddMonths(1), 1);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
 }

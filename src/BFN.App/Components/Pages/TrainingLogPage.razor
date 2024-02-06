@@ -78,7 +78,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         exercise = await dataService.db.GetAsync<Exercise>(ExerciseId);
-        logs = await dataService.GetLogs(ExerciseId);
+        logs = await dataService.GetLogsForExercise(ExerciseId);
     }
 
     private void SelectLog(TrainingLog log)
@@ -122,7 +122,7 @@ else
             MetricWeight = trainingLog.MetricWeight,
             Reps = trainingLog.Reps,
         };
-        logs = await dataService.GetLogs(ExerciseId);
+        logs = await dataService.GetLogsForExercise(ExerciseId);
     }
 
     private async Task ClearOrDelete()
@@ -130,7 +130,7 @@ else
         if (isEditMode)
         {
             await dataService.db.DeleteAsync(trainingLog);
-            logs = await dataService.GetLogs(ExerciseId);
+            logs = await dataService.GetLogsForExercise(ExerciseId);
             isEditMode = false;
             primaryButtonText = "Save";
             secondaryButtonText = "Clear";
