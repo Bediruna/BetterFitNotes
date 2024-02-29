@@ -190,4 +190,17 @@ public static class DefaultRecords
             return exercises;
         }
     }
+    public static AppSettings AppSettings
+    {
+        get
+        {
+            var appSettings = new AppSettings
+            {
+                WeightIncrement = 5,
+                UseMetric = false,
+                UseGraphicsForExercises = false
+            };
+            return appSettings;
+        }
+    }
 }

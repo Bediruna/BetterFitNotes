@@ -20,8 +20,6 @@ namespace BFN.App.Services
             }
             catch (Exception ex)
             {
-                // Handle or log the exception as required
-                //throw new InvalidOperationException("Failed to initialize database", ex);
                 Console.WriteLine(ex.ToString());
             }
         }
@@ -37,6 +35,7 @@ namespace BFN.App.Services
                     await db.CreateTableAsync<Category>();
                     await db.CreateTableAsync<Exercise>();
                     await db.CreateTableAsync<TrainingLog>();
+                    await db.CreateTableAsync<AppSettings>();
 
                     await AddDefaultRecordsIfNeeded();
 
@@ -44,8 +43,6 @@ namespace BFN.App.Services
                 }
                 catch (Exception ex)
                 {
-                    // Handle or log the exception as required
-                    //throw new InvalidOperationException("Database initialization failed", ex);
                     Console.WriteLine(ex.ToString());
                 }
             }
@@ -126,11 +123,16 @@ namespace BFN.App.Services
                         }
                     });
                 }
+
+                var appSettingsList = await db.Table<AppSettings>().ToListAsync();
+                if (appSettingsList.Count == 0)
+                {
+                    await db.InsertAsync(DefaultRecords.AppSettings);
+                }
+
             }
             catch (Exception ex)
             {
-                // Handle or log the exception as required
-                //throw new InvalidOperationException("Failed to add default records", ex);
                 Console.WriteLine(ex.ToString());
             }
         }
