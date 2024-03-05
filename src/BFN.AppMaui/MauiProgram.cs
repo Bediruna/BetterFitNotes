@@ -1,7 +1,6 @@
-﻿using BFN.Services;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
-namespace BFN.App
+namespace BFN.AppMaui
 {
     public static class MauiProgram
     {
@@ -13,14 +12,10 @@ namespace BFN.App
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            builder.Services.AddMauiBlazorWebView();
-
-            builder.Services.AddSingleton<DataService>();
-
 #if DEBUG
-            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 
