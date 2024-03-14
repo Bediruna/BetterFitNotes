@@ -69,7 +69,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BFN.Data\BFN.Data.csproj" />
-      <ProjectReference Include="..\BFN.Services\BFN.Services.csproj" />
     </ItemGroup>
 
 </Project>
