@@ -51,7 +51,13 @@ else
                 {
                     var currentLog = logs[i];
                     <tr @onclick="() => SelectLog(currentLog)" class="@(trainingLog.Id == currentLog.Id ? "table-info" : "")">
-                        <td>@(i + 1)</td>
+                        <td>
+                            @(i + 1)
+                            @if (personalRecords.ContainsKey(currentLog.Reps) && currentLog.MetricWeight >= personalRecords[currentLog.Reps])
+                            {
+                                <span>🏆</span>
+                            }
+                        </td>
                         <td>@currentLog.MetricWeight lbs</td>
                         <td>@currentLog.Reps reps</td>
                     </tr>
@@ -59,7 +65,6 @@ else
             </tbody>
         </table>
     }
-
 }
 
 @code {
@@ -74,11 +79,14 @@ else
     private string primaryButtonText = "Save";
     private string secondaryButtonText = "Clear";
     private bool isEditMode = false;
+    private Dictionary<int, double> personalRecords = new Dictionary<int, double>();
 
     protected override async Task OnInitializedAsync()
     {
         exercise = await dataService.db.GetAsync<Exercise>(ExerciseId);
         logs = await dataService.GetLogsForExercise(ExerciseId);
+
+        personalRecords = await dataService.GetPersonalRecordsForExercise(ExerciseId);
     }
 
     private void SelectLog(TrainingLog log)
@@ -118,11 +126,17 @@ else
         }
 
         trainingLog = new TrainingLog
-        {
-            MetricWeight = trainingLog.MetricWeight,
-            Reps = trainingLog.Reps,
-        };
+            {
+                MetricWeight = trainingLog.MetricWeight,
+                Reps = trainingLog.Reps,
+            };
+
+        /*
+         * here we are hitting the db again, when we may be able to use the in memory list of logs and PRs
+         * Adjust based on performance
+         */
         logs = await dataService.GetLogsForExercise(ExerciseId);
+        personalRecords = await dataService.GetPersonalRecordsForExercise(ExerciseId);
     }
 
     private async Task ClearOrDelete()

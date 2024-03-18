@@ -7,7 +7,7 @@
 <style>
     .calendar-container {
         overflow-y: auto;
-        height: calc(100vh - 120px); /* Adjust based on your header/footer */
+        height: calc(100vh - 120px);
     }
 
     .month-view {
@@ -20,20 +20,13 @@
     }
 
         .calendar th, .calendar td {
-            /* border: 1px solid #ddd; */
             padding: 8px;
             text-align: center;
         }
-
-        .calendar th {
-            /* background-color: #f4f4f4; */
-        }
-
 </style>
 
-<h3>Calendar</h3>
-
-<div class="calendar-container" @ref="calendarContainer">
+<div class="calendar-container" @ref="calendarContainer" id="calendarContainer">
+    <h3>Calendar</h3>
     @foreach (var monthDate in displayedMonths)
     {
         <div class="month-container">
@@ -101,7 +94,7 @@
 
     private List<DateTime> displayedMonths = new();
     private DateTime initialMonth = DateTime.Today;
-    private int monthsToDisplay = 12; // Initial number of months to display
+    private int monthsToDisplay = 24; // Initial number of months to display
 
     protected override void OnInitialized()
     {
@@ -141,7 +134,7 @@
         if (prepend)
         {
             var firstMonth = displayedMonths.First();
-            LoadMonths(firstMonth.AddMonths(-1), 1, true);
+            LoadMonths(firstMonth.AddMonths(0), 1, true);
         }
         else
         {

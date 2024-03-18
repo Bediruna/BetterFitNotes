@@ -136,5 +136,29 @@ namespace BFN.App.Services
                 Console.WriteLine(ex.ToString());
             }
         }
+
+        public async Task<Dictionary<int, double>> GetPersonalRecordsForExercise(int exerciseId)
+        {
+            try
+            {
+                // Group logs by reps, then select the max weight for each group
+                var logs = await db.Table<TrainingLog>()
+                                   .Where(log => log.ExerciseId == exerciseId)
+                                   .ToListAsync();
+
+                var personalRecords = logs
+                                      .GroupBy(log => log.Reps)
+                                      .Select(g => new { Reps = g.Key, MaxWeight = g.Max(log => log.MetricWeight) })
+                                      .ToDictionary(x => x.Reps, x => x.MaxWeight);
+
+                return personalRecords;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return [];
+            }
+        }
+
     }
 }
