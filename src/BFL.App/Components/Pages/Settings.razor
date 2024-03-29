@@ -1,0 +1,29 @@
+@page "/settings"
+
+<h3>Settings</h3>
+
+<EditForm Model="@appSettings" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label for="WeightIncrement">Weight Increment</label>
+        <InputNumber id="WeightIncrement" @bind-Value="appSettings.WeightIncrement" class="form-control" />
+    </div>
+
+    <div class="form-check">
+        <input type="checkbox" id="UseMetric" @bind="appSettings.UseMetric" class="form-check-input" />
+        <label class="form-check-label" for="UseMetric">Use Metric System</label>
+    </div>
+
+    <div class="form-check">
+        <input type="checkbox" id="UseGraphicsForExercises" @bind="appSettings.UseGraphicsForExercises" class="form-check-input" />
+        <label class="form-check-label" for="UseGraphicsForExercises">Use Graphics for Exercises</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}

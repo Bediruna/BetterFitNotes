@@ -10,7 +10,7 @@ namespace BFN.App.Services
     {
         public SQLiteAsyncConnection db;
         private static bool isInitialized = false;
-        public DateTime SelectedDate { get; set; } = DateTime.Now;
+        public DateOnly SelectedDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
         public DataService()
         {
@@ -36,6 +36,7 @@ namespace BFN.App.Services
                     await db.CreateTableAsync<Exercise>();
                     await db.CreateTableAsync<TrainingLog>();
                     await db.CreateTableAsync<AppSettings>();
+                    await db.CreateTableAsync<ErrorLog>();
 
                     await AddDefaultRecordsIfNeeded();
 
@@ -52,7 +53,7 @@ namespace BFN.App.Services
         {
             try
             {
-                var startDate = SelectedDate.Date;
+                var startDate = SelectedDate;
                 var nextDay = startDate.AddDays(1);
 
                 var results = await db.QueryAsync<TrainingLogWithExerciseName>(SqlScripts.GetLogsWithExerciseNameForDay, startDate, nextDay);
@@ -66,19 +67,56 @@ namespace BFN.App.Services
             }
         }
 
+        public async Task<List<TrainingLog>> DeleteExerciseAndReturnUpdatedLogs(TrainingLog exerciseToDelete)
+        {
+            var updatedLogsForTheDay = new List<TrainingLog>();
+            try
+            {
+                // Define the date range of interest
+                var dateOfExercise = exerciseToDelete.LogDate;
+
+                // Delete the exercise
+                await db.DeleteAsync(exerciseToDelete);
+
+                // Retrieve and update the OrderInDay for remaining exercises on the same day
+                var exercisesForTheDay = await GetLogsForExercise(exerciseToDelete.Id);
+
+                int updatedOrder = 1; // Start reordering from 1
+                foreach (var exercise in exercisesForTheDay)
+                {
+                    if (exercise.Id != exerciseToDelete.Id) // Skip the deleted exercise (if it's still in the list due to async timing)
+                    {
+                        exercise.OrderInDay = updatedOrder++;
+                        await db.UpdateAsync(exercise);
+                    }
+                }
+
+                // Retrieve the updated list of logs for that day
+                updatedLogsForTheDay = await GetLogsForExercise(exerciseToDelete.Id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Consider handling the error more gracefully, depending on your application's needs
+            }
+
+            return updatedLogsForTheDay;
+        }
+
 
         public async Task<List<TrainingLog>> GetLogsForExercise(int exerciseId)
         {
             try
             {
-                var startDate = SelectedDate.Date;
+                var startDate = SelectedDate;
                 var nextDay = startDate.AddDays(1);
 
                 var results = await db.Table<TrainingLog>()
                                       .Where(log => log.ExerciseId == exerciseId &&
-                                                    log.Date >= startDate &&
-                                                    log.Date < nextDay)
-                                      .OrderByDescending(log => log.Date)
+                                                    log.LogDate >= startDate &&
+                                                    log.LogDate < nextDay)
+                                      .OrderBy(log => log.OrderInDay)
+                                      .ThenByDescending(log => log.LogDate)
                                       .ToListAsync();
 
                 return results;

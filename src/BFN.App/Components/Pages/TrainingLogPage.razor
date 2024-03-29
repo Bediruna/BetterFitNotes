@@ -121,7 +121,7 @@ else
         else
         {
             trainingLog.ExerciseId = ExerciseId;
-            trainingLog.Date = dataService.SelectedDate;
+            trainingLog.LogDate = dataService.SelectedDate;
             await dataService.db.InsertAsync(trainingLog);
         }
 
