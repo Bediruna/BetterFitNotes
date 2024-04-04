@@ -2,7 +2,7 @@
 
 public static class Constants
 {
-    public const string DatabaseFilename = "BFNData.db";
+    public const string DatabaseFilename = "BFLData.db";
 
     public const SQLite.SQLiteOpenFlags Flags =
         // open the database in read/write mode

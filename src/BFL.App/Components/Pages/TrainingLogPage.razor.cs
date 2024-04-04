@@ -1,5 +1,5 @@
 ﻿using BFL.App.Services;
-using BFN.Data.Models;
+using BFL.Data.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace BFL.App.Components.Pages;
@@ -13,14 +13,14 @@ public partial class TrainingLogPage : ComponentBase
     public int ExerciseId { get; set; }
 
     private Exercise exercise;
-    private TrainingLog trainingLog = new TrainingLog();
-    private List<TrainingLog> logs = new List<TrainingLog>();
+    private TrainingLog trainingLog = new();
+    private List<TrainingLog> logs = [];
 
     private string errorMessage;
     private string primaryButtonText = "Save";
     private string secondaryButtonText = "Clear";
     private bool isEditMode = false;
-    private Dictionary<int, double> personalRecords = new Dictionary<int, double>();
+    private Dictionary<int, double> personalRecords = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,8 +62,8 @@ public partial class TrainingLogPage : ComponentBase
         else
         {
             trainingLog.ExerciseId = ExerciseId;
+            trainingLog.ExerciseName = exercise.Name;
             trainingLog.LogDate = dataService.SelectedDate;
-            trainingLog.OrderInDay = logs.Count + 1;//need to handle this when there's a delete
             await dataService.db.InsertAsync(trainingLog);
         }
 

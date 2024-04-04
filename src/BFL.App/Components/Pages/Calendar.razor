@@ -1,0 +1,49 @@
+@page "/calendar"
+
+<style>
+    .calendar-container {
+        overflow-y: auto;
+        height: calc(100vh - 120px);
+    }
+
+    .month-view {
+        margin-bottom: 20px;
+    }
+
+    .calendar {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .calendar th, .calendar td {
+            padding: 8px;
+            text-align: center;
+        }
+</style>
+
+<div class="calendar-container" @ref="calendarContainer" id="calendarContainer">
+    <h3>Calendar</h3>
+    @foreach (var monthDate in displayedMonths)
+    {
+        <div class="month-container">
+            <h2>@monthDate.ToString("Y")</h2>
+            <table class="calendar">
+                <thead>
+                    <tr>
+                        <th>Sun</th>
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thu</th>
+                        <th>Fri</th>
+                        <th>Sat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @RenderMonth(monthDate.Month)
+                </tbody>
+            </table>
+        </div>
+    }
+
+</div>

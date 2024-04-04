@@ -1,5 +1,5 @@
-﻿using BFN.Data.Models.DTOs;
-using BFL.App.Services;
+﻿using BFL.App.Services;
+using BFL.Data.Models;
 using Microsoft.AspNetCore.Components;
 namespace BFL.App.Components.Pages;
 
@@ -11,7 +11,7 @@ public partial class Home : ComponentBase
     [Inject]
     private NavigationManager NavigationManager { get; set; }
 
-    private List<TrainingLogWithExerciseName> logs = [];
+    private List<TrainingLog> logs = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -22,7 +22,7 @@ public partial class Home : ComponentBase
     {
         get
         {
-            var today = DateOnly.FromDateTime(DateTime.Today);
+            var today = DateTime.Today;
             var date = _dataService.SelectedDate;
 
             if (date == today)
@@ -46,7 +46,7 @@ public partial class Home : ComponentBase
 
     private async Task SetDateToToday()
     {
-        _dataService.SelectedDate = DateOnly.FromDateTime(DateTime.Now);
+        _dataService.SelectedDate = DateTime.Now;
         logs = await _dataService.GetExercises();
     }
 

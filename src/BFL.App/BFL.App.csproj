@@ -63,12 +63,12 @@
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-		<PackageReference Include="sqlite-net-pcl" Version="1.9.141-beta" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.118" />
 	</ItemGroup>
-
+	
 	<ItemGroup>
-		<ProjectReference Include="..\BFN.Data\BFN.Data.csproj" />
+	  <ProjectReference Include="..\BFL.Data\BFL.Data.csproj" />
 	</ItemGroup>
 
 </Project>

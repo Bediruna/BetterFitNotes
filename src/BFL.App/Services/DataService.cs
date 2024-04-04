@@ -1,7 +1,5 @@
-﻿using BFN.Data.Migrations;
-using BFN.Data.Models;
-using BFN.Data.Models.DTOs;
-using BFN.Data.Scripts;
+﻿using BFL.Data.Migrations;
+using BFL.Data.Models;
 using SQLite;
 
 namespace BFL.App.Services;
@@ -9,7 +7,7 @@ public class DataService
 {
     public SQLiteAsyncConnection db;
     private static bool isInitialized = false;
-    public DateOnly SelectedDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    public DateTime SelectedDate { get; set; } = DateTime.Now;
 
     public DataService()
     {
@@ -29,12 +27,13 @@ public class DataService
         {
             try
             {
-                db = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
+                db = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags, true);
 
                 await db.CreateTableAsync<Category>();
                 await db.CreateTableAsync<Exercise>();
-                await db.CreateTableAsync<TrainingLog>();
+                await db.CreateTableAsync<TrainingLog>();//write custom sql to add date field
                 await db.CreateTableAsync<AppSettings>();
+                await db.CreateTableAsync<ErrorLog>();
 
                 await AddDefaultRecordsIfNeeded();
 
@@ -47,14 +46,40 @@ public class DataService
         }
     }
 
-    public async Task<List<TrainingLogWithExerciseName>> GetExercises()
+    public async Task<List<TrainingLog>> GetExercises()
     {
         try
         {
-            var startDate = SelectedDate;
+            var startDate = new DateTime(SelectedDate.Year, SelectedDate.Month, SelectedDate.Day);
             var nextDay = startDate.AddDays(1);
 
-            var results = await db.QueryAsync<TrainingLogWithExerciseName>(SqlScripts.GetLogsWithExerciseNameForDay, startDate, nextDay);
+            var results = await db.Table<TrainingLog>()
+                                  .Where(log => log.LogDate >= startDate && log.LogDate < nextDay)
+                                  .OrderByDescending(log => log.LogDate)
+                                  .ToListAsync();
+
+            return results;
+        }
+        catch (Exception ex)
+        {
+            await LogError(ex);
+            return [];
+        }
+    }
+
+    public async Task<List<TrainingLog>> GetLogsForExercise(int exerciseId)
+    {
+        try
+        {
+            var startDate = new DateTime(SelectedDate.Year, SelectedDate.Month, SelectedDate.Day);
+            var nextDay = startDate.AddDays(1);
+
+            var results = await db.Table<TrainingLog>()
+                                  .Where(log => log.ExerciseId == exerciseId &&
+                                                log.LogDate >= startDate &&
+                                                log.LogDate < nextDay)
+                                  .OrderByDescending(log => log.LogDate)
+                                  .ToListAsync();
 
             return results;
         }
@@ -84,7 +109,6 @@ public class DataService
             {
                 if (exercise.Id != exerciseToDelete.Id) // Skip the deleted exercise (if it's still in the list due to async timing)
                 {
-                    exercise.OrderInDay = updatedOrder++;
                     await db.UpdateAsync(exercise);
                 }
             }
@@ -98,31 +122,6 @@ public class DataService
         }
 
         return updatedLogsForTheDay;
-    }
-
-
-    public async Task<List<TrainingLog>> GetLogsForExercise(int exerciseId)
-    {
-        try
-        {
-            var startDate = SelectedDate;
-            var nextDay = startDate.AddDays(1);
-
-            var results = await db.Table<TrainingLog>()
-                                  .Where(log => log.ExerciseId == exerciseId &&
-                                                log.LogDate >= startDate &&
-                                                log.LogDate < nextDay)
-                                  .OrderBy(log => log.OrderInDay)
-                                  .ThenByDescending(log => log.LogDate)
-                                  .ToListAsync();
-
-            return results;
-        }
-        catch (Exception ex)
-        {
-            await LogError(ex);
-            return [];
-        }
     }
 
     public async Task AddDefaultRecordsIfNeeded()
@@ -212,5 +211,4 @@ public class DataService
             Console.WriteLine("Failed to log error because: " + ex.ToString());
         }
     }
-
 }

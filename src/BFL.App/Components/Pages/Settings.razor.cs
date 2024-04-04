@@ -1,4 +1,4 @@
-﻿using BFN.Data.Models;
+﻿using BFL.Data.Models;
 using BFL.App.Services;
 using Microsoft.AspNetCore.Components;
 namespace BFL.App.Components.Pages;
