@@ -52,7 +52,9 @@ else
                             @(i + 1)
                             @if (personalRecords.ContainsKey(currentLog.Reps) && currentLog.MetricWeight >= personalRecords[currentLog.Reps])
                             {
-                                <span>🏆</span>
+                                <span>
+                                    <Icons:TrophyIcon/>
+                                </span>
                             }
                         </td>
                         <td>@currentLog.MetricWeight lbs</td>
