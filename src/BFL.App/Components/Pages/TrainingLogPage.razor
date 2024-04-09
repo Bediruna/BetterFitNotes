@@ -6,62 +6,88 @@
 }
 else
 {
-    <h1>@exercise.Name</h1>
-    <EditForm Model="@trainingLog" OnValidSubmit="HandleValidSubmit">
-        <div>
-            <label for="metricWeight">Weight (lbs):</label>
-            <div class="input-group mb-3">
-                <button class="btn btn-secondary px-4" type="button" @onclick="DecrementWeight">-</button>
-                <InputNumber @bind-Value="trainingLog.MetricWeight" id="metricWeight" class="form-control text-center" />
-                <button class="btn btn-secondary px-4" type="button" @onclick="IncrementWeight">+</button>
-            </div>
-        </div>
-        <div>
-            <label for="reps">Reps:</label>
-            <div class="input-group mb-3">
-                <button class="btn btn-secondary px-4" type="button" @onclick="DecrementReps" disabled="@((trainingLog.Reps <= 1))">-</button>
-                <InputNumber @bind-Value="trainingLog.Reps" id="reps" class="form-control text-center" />
-                <button class="btn btn-secondary px-4" type="button" @onclick="IncrementReps">+</button>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-6">
-                <button type="submit" class="btn @(isEditMode ? "btn-success" : "btn-primary") w-100">@primaryButtonText</button>
-            </div>
-            <div class="col-6">
-                <button type="button" @onclick="ClearOrDelete" class="btn @(isEditMode ? "btn-danger" : "btn-secondary") w-100">@secondaryButtonText</button>
-            </div>
-        </div>
+    <div class="d-flex justify-content-between tab-container">
+        <button class="flex-fill tab-button @((selectedTab == "track" ? "active" : ""))" @onclick='() => { selectedTab = "track"; }'>TRACK</button>
+        <button class="flex-fill tab-button @((selectedTab == "history" ? "active" : ""))" @onclick='() => { selectedTab = "history"; }'>HISTORY</button>
+        <button class="flex-fill tab-button @((selectedTab == "analyze" ? "active" : ""))" @onclick='() => { selectedTab = "analyze"; }'>ANALYZE</button>
+    </div>
 
-        @if (!string.IsNullOrEmpty(errorMessage))
+    <div class="p-3">
+        <h1>@exercise.Name</h1>
+
+        @if (selectedTab == "track")
         {
-            <div class="alert alert-danger" role="alert">
-                @errorMessage
+            <EditForm Model="@trainingLog" OnValidSubmit="HandleValidSubmit">
+                <div>
+                    <label for="metricWeight">Weight (lbs):</label>
+                    <div class="input-group mb-3">
+                        <button class="btn btn-secondary px-4" type="button" @onclick="DecrementWeight">-</button>
+                        <InputNumber @bind-Value="trainingLog.MetricWeight" id="metricWeight" class="form-control text-center" />
+                        <button class="btn btn-secondary px-4" type="button" @onclick="IncrementWeight">+</button>
+                    </div>
+                </div>
+                <div>
+                    <label for="reps">Reps:</label>
+                    <div class="input-group mb-3">
+                        <button class="btn btn-secondary px-4" type="button" @onclick="DecrementReps" disabled="@((trainingLog.Reps <= 1))">-</button>
+                        <InputNumber @bind-Value="trainingLog.Reps" id="reps" class="form-control text-center" />
+                        <button class="btn btn-secondary px-4" type="button" @onclick="IncrementReps">+</button>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <button type="submit" class="btn @(isEditMode ? "btn-success" : "btn-primary") w-100">@primaryButtonText</button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" @onclick="ClearOrDelete" class="btn @(isEditMode ? "btn-danger" : "btn-secondary") w-100">@secondaryButtonText</button>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @errorMessage
+                    </div>
+                }
+            </EditForm>
+            @if (logs.Any())
+            {
+                <table class="table">
+                    <tbody>
+                        @for (int i = 0; i < logs.Count; i++)
+                        {
+                            var currentLog = logs[i];
+                            <tr @onclick="() => SelectLog(currentLog)" class="@(trainingLog.Id == currentLog.Id ? "table-info" : "")">
+                                <td>
+                                    @(i + 1)
+                                    @if (personalRecords.ContainsKey(currentLog.Reps) && currentLog.MetricWeight >= personalRecords[currentLog.Reps])
+                                    {
+                                        <span>
+                                            <Icons:TrophyIcon />
+                                        </span>
+                                    }
+                                </td>
+                                <td>@currentLog.MetricWeight lbs</td>
+                                <td>@currentLog.Reps reps</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+        else if (selectedTab == "history")
+        {
+            <div>
+                <!-- History tab content here -->
+                <h3>history</h3>
             </div>
         }
-    </EditForm>
-    @if (logs.Any())
-    {
-        <table class="table">
-            <tbody>
-                @for (int i = 0; i < logs.Count; i++)
-                {
-                    var currentLog = logs[i];
-                    <tr @onclick="() => SelectLog(currentLog)" class="@(trainingLog.Id == currentLog.Id ? "table-info" : "")">
-                        <td>
-                            @(i + 1)
-                            @if (personalRecords.ContainsKey(currentLog.Reps) && currentLog.MetricWeight >= personalRecords[currentLog.Reps])
-                            {
-                                <span>
-                                    <Icons:TrophyIcon/>
-                                </span>
-                            }
-                        </td>
-                        <td>@currentLog.MetricWeight lbs</td>
-                        <td>@currentLog.Reps reps</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+        else if (selectedTab == "analyze")
+        {
+            <div>
+                <!-- Analyze tab content here -->
+                <h3>analyze</h3>
+            </div>
+        }
+    </div>
 }

@@ -22,6 +22,9 @@ public partial class TrainingLogPage : ComponentBase
     private bool isEditMode = false;
     private Dictionary<int, double> personalRecords = [];
 
+
+    private string selectedTab = "track";
+
     protected override async Task OnInitializedAsync()
     {
         exercise = await dataService.db.GetAsync<Exercise>(ExerciseId);

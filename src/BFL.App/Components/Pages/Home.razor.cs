@@ -15,7 +15,7 @@ public partial class Home : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        logs = await _dataService.GetExercises();
+        logs = await _dataService.GetLogsForSelectedDate();
     }
 
     private string DisplayDateText
@@ -23,7 +23,7 @@ public partial class Home : ComponentBase
         get
         {
             var today = DateTime.Today;
-            var date = _dataService.SelectedDate;
+            var date = _dataService.SelectedDate.Date;
 
             if (date == today)
             {
@@ -47,19 +47,19 @@ public partial class Home : ComponentBase
     private async Task SetDateToToday()
     {
         _dataService.SelectedDate = DateTime.Now;
-        logs = await _dataService.GetExercises();
+        logs = await _dataService.GetLogsForSelectedDate();
     }
 
     private async Task GoToPreviousDay()
     {
         _dataService.SelectedDate = _dataService.SelectedDate.AddDays(-1);
-        logs = await _dataService.GetExercises();
+        logs = await _dataService.GetLogsForSelectedDate();
     }
 
     private async Task GoToNextDay()
     {
         _dataService.SelectedDate = _dataService.SelectedDate.AddDays(1);
-        logs = await _dataService.GetExercises();
+        logs = await _dataService.GetLogsForSelectedDate();
     }
 
     private void NavigateToExercise(int exerciseId)

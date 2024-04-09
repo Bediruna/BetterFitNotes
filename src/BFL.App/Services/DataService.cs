@@ -46,7 +46,22 @@ public class DataService
         }
     }
 
-    public async Task<List<TrainingLog>> GetExercises()
+    public async Task<List<TrainingLog>> GetAllLogs()
+    {
+        try
+        {
+            var results = await db.Table<TrainingLog>().ToListAsync();
+
+            return results;
+        }
+        catch (Exception ex)
+        {
+            await LogError(ex);
+            return [];
+        }
+    }
+
+    public async Task<List<TrainingLog>> GetLogsForSelectedDate()
     {
         try
         {

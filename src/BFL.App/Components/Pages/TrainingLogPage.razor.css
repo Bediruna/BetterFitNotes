@@ -1,0 +1,16 @@
+.tab-container {
+    background-color: #333338;
+}
+
+.tab-button {
+    background: none;
+    color: white;
+    border: none;
+    font-size: 1.2em;
+    padding-top: .5em;
+    border-bottom: .5em solid transparent;
+}
+
+    .tab-button.active {
+        border-bottom-color: cornflowerblue;
+    }
