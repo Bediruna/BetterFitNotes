@@ -13,8 +13,9 @@ public partial class TrainingLogPage : ComponentBase
     public int ExerciseId { get; set; }
 
     private Exercise exercise;
-    private TrainingLog trainingLog = new();
-    private List<TrainingLog> logs = [];
+    private TrainingLog selectedLog = new();
+    private List<TrainingLog> exerciseLogs = [];
+    private List<TrainingLog> logsForSelectedDate = [];
 
     private string errorMessage;
     private string primaryButtonText = "Save";
@@ -28,14 +29,16 @@ public partial class TrainingLogPage : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         exercise = await dataService.db.GetAsync<Exercise>(ExerciseId);
-        logs = await dataService.GetLogsForExercise(ExerciseId);
+        exerciseLogs = await dataService.GetLogsForExercise(ExerciseId);
+
+        logsForSelectedDate = await dataService.GetLogsForExerciseAndSelectedDate(ExerciseId);
 
         personalRecords = await dataService.GetPersonalRecordsForExercise(ExerciseId);
     }
 
     private void SelectLog(TrainingLog log)
     {
-        trainingLog = log;
+        selectedLog = log;
         isEditMode = true;
         primaryButtonText = "Update";
         secondaryButtonText = "Delete";
@@ -43,9 +46,9 @@ public partial class TrainingLogPage : ComponentBase
 
     private async Task HandleValidSubmit()
     {
-        if (trainingLog.Reps <= 0)
+        if (selectedLog.Reps <= 0)
         {
-            trainingLog.Reps = 1;
+            selectedLog.Reps = 1;
             errorMessage = "Reps must be greater than 0.";
             StateHasChanged();
             return;
@@ -57,30 +60,30 @@ public partial class TrainingLogPage : ComponentBase
 
         if (isEditMode)
         {
-            await dataService.db.UpdateAsync(trainingLog);
+            await dataService.db.UpdateAsync(selectedLog);
             isEditMode = false;
             primaryButtonText = "Save";
             secondaryButtonText = "Clear";
         }
         else
         {
-            trainingLog.ExerciseId = ExerciseId;
-            trainingLog.ExerciseName = exercise.Name;
-            trainingLog.LogDate = dataService.SelectedDate;
-            await dataService.db.InsertAsync(trainingLog);
+            selectedLog.ExerciseId = ExerciseId;
+            selectedLog.ExerciseName = exercise.Name;
+            selectedLog.LogDate = dataService.SelectedDate;
+            await dataService.db.InsertAsync(selectedLog);
         }
 
-        trainingLog = new TrainingLog
+        selectedLog = new TrainingLog
         {
-            MetricWeight = trainingLog.MetricWeight,
-            Reps = trainingLog.Reps,
+            MetricWeight = selectedLog.MetricWeight,
+            Reps = selectedLog.Reps,
         };
 
         /*
          * here we are hitting the db again, when we may be able to use the in memory list of logs and PRs
          * Adjust based on performance
          */
-        logs = await dataService.GetLogsForExercise(ExerciseId);
+        logsForSelectedDate = await dataService.GetLogsForExerciseAndSelectedDate(ExerciseId);
         personalRecords = await dataService.GetPersonalRecordsForExercise(ExerciseId);
     }
 
@@ -88,42 +91,43 @@ public partial class TrainingLogPage : ComponentBase
     {
         if (isEditMode)
         {
-            logs = await dataService.DeleteExerciseAndReturnUpdatedLogs(trainingLog);
-            //logs = await dataService.GetLogsForExercise(ExerciseId);
+            //logs = await dataService.DeleteExerciseAndReturnUpdatedLogs(selectedLog);
+            await dataService.db.DeleteAsync(selectedLog);
+            logsForSelectedDate = await dataService.GetLogsForExerciseAndSelectedDate(ExerciseId);
             isEditMode = false;
             primaryButtonText = "Save";
             secondaryButtonText = "Clear";
         }
 
-        trainingLog = new TrainingLog();
+        selectedLog = new TrainingLog();
         StateHasChanged();
     }
 
     private void IncrementWeight()
     {
         int weightIncrement = 5;//might want to add this to appsettings
-        trainingLog.MetricWeight += weightIncrement;
+        selectedLog.MetricWeight += weightIncrement;
     }
 
     private void DecrementWeight()
     {
         int weightIncrement = 5;//might want to add this to appsettings
-        if (trainingLog.MetricWeight > weightIncrement)
+        if (selectedLog.MetricWeight > weightIncrement)
         {
-            trainingLog.MetricWeight -= weightIncrement;
+            selectedLog.MetricWeight -= weightIncrement;
         }
     }
 
     private void IncrementReps()
     {
-        trainingLog.Reps++;
+        selectedLog.Reps++;
     }
 
     private void DecrementReps()
     {
-        if (trainingLog.Reps > 1)
+        if (selectedLog.Reps > 1)
         {
-            trainingLog.Reps--;
+            selectedLog.Reps--;
         }
     }
 }

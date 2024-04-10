@@ -1,4 +1,5 @@
 ﻿@page "/traininglog/{ExerciseId:int}"
+@layout BFL.App.Components.Layout.BlankLayout
 
 @if (exercise == null)
 {
@@ -6,10 +7,28 @@
 }
 else
 {
-    <div class="d-flex justify-content-between tab-container">
-        <button class="flex-fill tab-button @((selectedTab == "track" ? "active" : ""))" @onclick='() => { selectedTab = "track"; }'>TRACK</button>
-        <button class="flex-fill tab-button @((selectedTab == "history" ? "active" : ""))" @onclick='() => { selectedTab = "history"; }'>HISTORY</button>
-        <button class="flex-fill tab-button @((selectedTab == "analyze" ? "active" : ""))" @onclick='() => { selectedTab = "analyze"; }'>ANALYZE</button>
+    <div class="sticky-top">
+        <div class="navbar navbar-dark bg-dark">
+            <div class="container-fluid justify-content-between">
+                <NavLink class="navbar-brand fs-4" href="" Match="NavLinkMatch.All">
+                    BetterFitLogs
+                </NavLink>
+                <NavLink class="nav-link fs-2" href="calendar">
+                    <CalendarIcon />
+                </NavLink>
+                <NavLink class="nav-link fs-1" href="categories">
+                    <span style="color: white;">+</span>
+                </NavLink>
+                <NavLink class="nav-link fs-2" href="settings">
+                    <SettingsIcon />
+                </NavLink>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between tab-container">
+            <button class="flex-grow-1 tab-button @((selectedTab == "track" ? "active" : ""))" @onclick='() => { selectedTab = "track"; }'>TRACK</button>
+            <button class="flex-grow-1 tab-button @((selectedTab == "history" ? "active" : ""))" @onclick='() => { selectedTab = "history"; }'>HISTORY</button>
+            @* <button class="flex-grow-1 tab-button @((selectedTab == "analyze" ? "active" : ""))" @onclick='() => { selectedTab = "analyze"; }'>ANALYZE</button> *@
+        </div>
     </div>
 
     <div class="p-3">
@@ -17,20 +36,20 @@ else
 
         @if (selectedTab == "track")
         {
-            <EditForm Model="@trainingLog" OnValidSubmit="HandleValidSubmit">
+            <EditForm Model="@selectedLog" OnValidSubmit="HandleValidSubmit">
                 <div>
                     <label for="metricWeight">Weight (lbs):</label>
                     <div class="input-group mb-3">
                         <button class="btn btn-secondary px-4" type="button" @onclick="DecrementWeight">-</button>
-                        <InputNumber @bind-Value="trainingLog.MetricWeight" id="metricWeight" class="form-control text-center" />
+                        <InputNumber @bind-Value="selectedLog.MetricWeight" id="metricWeight" class="form-control text-center" />
                         <button class="btn btn-secondary px-4" type="button" @onclick="IncrementWeight">+</button>
                     </div>
                 </div>
                 <div>
                     <label for="reps">Reps:</label>
                     <div class="input-group mb-3">
-                        <button class="btn btn-secondary px-4" type="button" @onclick="DecrementReps" disabled="@((trainingLog.Reps <= 1))">-</button>
-                        <InputNumber @bind-Value="trainingLog.Reps" id="reps" class="form-control text-center" />
+                        <button class="btn btn-secondary px-4" type="button" @onclick="DecrementReps" disabled="@((selectedLog.Reps <= 1))">-</button>
+                        <InputNumber @bind-Value="selectedLog.Reps" id="reps" class="form-control text-center" />
                         <button class="btn btn-secondary px-4" type="button" @onclick="IncrementReps">+</button>
                     </div>
                 </div>
@@ -50,14 +69,14 @@ else
                     </div>
                 }
             </EditForm>
-            @if (logs.Any())
+            @if (logsForSelectedDate.Any())
             {
                 <table class="table">
                     <tbody>
-                        @for (int i = 0; i < logs.Count; i++)
+                        @for (int i = 0; i < logsForSelectedDate.Count; i++)
                         {
-                            var currentLog = logs[i];
-                            <tr @onclick="() => SelectLog(currentLog)" class="@(trainingLog.Id == currentLog.Id ? "table-info" : "")">
+                            var currentLog = logsForSelectedDate[i];
+                            <tr @onclick="() => SelectLog(currentLog)" class="@(selectedLog.Id == currentLog.Id ? "table-info" : "")">
                                 <td>
                                     @(i + 1)
                                     @if (personalRecords.ContainsKey(currentLog.Reps) && currentLog.MetricWeight >= personalRecords[currentLog.Reps])
@@ -77,10 +96,28 @@ else
         }
         else if (selectedTab == "history")
         {
-            <div>
-                <!-- History tab content here -->
-                <h3>history</h3>
-            </div>
+            <h3>History</h3>
+            @foreach (var group in exerciseLogs.GroupBy(log => log.LogDate.Date).OrderByDescending(g => g.Key))
+            {
+                <h5>@group.Key.ToString("D")</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Weight (lbs)</th>
+                            <th>Reps</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in group.OrderBy(log => log.LogDate))
+                        {
+                            <tr>
+                                <td>@log.MetricWeight lbs</td>
+                                <td>@log.Reps reps</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
         }
         else if (selectedTab == "analyze")
         {

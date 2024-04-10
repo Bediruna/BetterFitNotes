@@ -86,6 +86,24 @@ public class DataService
     {
         try
         {
+            var results = await db.Table<TrainingLog>()
+                                  .Where(log => log.ExerciseId == exerciseId)
+                                  .OrderByDescending(log => log.LogDate)
+                                  .ToListAsync();
+
+            return results;
+        }
+        catch (Exception ex)
+        {
+            await LogError(ex);
+            return [];
+        }
+    }
+
+    public async Task<List<TrainingLog>> GetLogsForExerciseAndSelectedDate(int exerciseId)
+    {
+        try
+        {
             var startDate = new DateTime(SelectedDate.Year, SelectedDate.Month, SelectedDate.Day);
             var nextDay = startDate.AddDays(1);
 
@@ -117,7 +135,7 @@ public class DataService
             await db.DeleteAsync(exerciseToDelete);
 
             // Retrieve and update the OrderInDay for remaining exercises on the same day
-            var exercisesForTheDay = await GetLogsForExercise(exerciseToDelete.Id);
+            var exercisesForTheDay = await GetLogsForExerciseAndSelectedDate(exerciseToDelete.Id);
 
             int updatedOrder = 1; // Start reordering from 1
             foreach (var exercise in exercisesForTheDay)
@@ -129,7 +147,7 @@ public class DataService
             }
 
             // Retrieve the updated list of logs for that day
-            updatedLogsForTheDay = await GetLogsForExercise(exerciseToDelete.Id);
+            updatedLogsForTheDay = await GetLogsForExerciseAndSelectedDate(exerciseToDelete.Id);
         }
         catch (Exception ex)
         {

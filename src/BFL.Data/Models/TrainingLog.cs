@@ -8,7 +8,6 @@ public class TrainingLog : BaseModel
     public int Reps { get; set; }
     public int Distance { get; set; }
     public int DurationSeconds { get; set; }
-    public int OrderInDay { get; set; }
     public DateTime LogDate { get; set; }
 
     public bool IsPersonalRecord { get; set; }
